@@ -63,6 +63,9 @@ class Openkaarten_Geodata_Controller extends \WP_REST_Posts_Controller {
 				add_filter( 'rest_prepare_' . $post_type, [ $this, 'add_geodata_to_rest_api' ], 10, 3 );
 			}
 		}
+
+		// Create custom filter to add geodata to the REST API response in a custom REST endpoint.
+		add_filter( 'ok_geo_rest_add_geodata', [ $this, 'add_geodata_to_custom_endpoint' ], 10, 2 );
 	}
 
 	/**
@@ -87,6 +90,54 @@ class Openkaarten_Geodata_Controller extends \WP_REST_Posts_Controller {
 		}
 
 		return $response;
+	}
 
+	/**
+	 * Add the geodata to the custom REST API response.
+	 *
+	 * @param array|object $data The data object.
+	 * @param WP_Post      $post The WP_Post object.
+	 */
+	public function add_geodata_to_custom_endpoint( $data, $post ) {
+		// Check if post is a valid WP_Post object.
+		if ( ! $post instanceof WP_Post ) {
+			return $data;
+		}
+
+		// Check if data is not empty.
+		if ( empty( $data ) ) {
+			return $data;
+		}
+
+		$post_id = $post->ID;
+
+		// Check if post type is configured to have geodata.
+		$openkaarten_post_types = get_option( 'openkaarten_post_types' );
+
+		if ( ! in_array( $post->post_type, $openkaarten_post_types, true ) ) {
+			return $data;
+		}
+
+		// Add the geometry object to the REST API response.
+		$geodata = get_post_meta( $post_id, 'geometry', true );
+
+		if ( empty( $geodata ) ) {
+			return $data;
+		}
+
+		$geodata = json_decode( $geodata );
+
+		// Add the geometry object to the data object.
+		if ( isset( $geodata->geometry ) ) {
+
+			// Check if the data object is an array or an object.
+			if ( is_array( $data ) ) {
+				$data['geometry'] = $geodata->geometry;
+			} elseif ( is_object( $data ) ) {
+				$data->geometry = $geodata->geometry;
+			}
+		}
+
+		return $data;
 	}
 }
