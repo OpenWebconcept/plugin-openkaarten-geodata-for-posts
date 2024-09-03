@@ -44,6 +44,6 @@ class Plugin {
 		/**
 		 * Register REST API specific functionality.
 		 */
-		//Rest_Api\Openkaarten_Controller::get_instance();
+		Rest_Api\Openkaarten_Geodata_Controller::get_instance();
 	}
 }
