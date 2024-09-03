@@ -49,6 +49,7 @@ class Cmb2 {
 	 */
 	private function __construct() {
 		add_action( 'cmb2_init', [ 'Openkaarten_Geodata_Plugin\Admin\Cmb2', 'action_cmb2_init' ] );
+		add_action( 'cmb2_render_geomap', [ 'Openkaarten_Geodata_Plugin\Admin\Cmb2', 'cmb2_render_geomap_field_type' ], 10, 5 );
 	}
 
 	/**
@@ -87,13 +88,43 @@ class Cmb2 {
 		$cmb = new_cmb2_box(
 			[
 				'id'           => $prefix . 'metabox',
-				'title'        => __( 'Location geometry object', 'openkaarten-base' ),
+				'title'        => __( 'Geodata', 'openkaarten-base' ),
 				'object_types' => $openkaarten_post_types,
 				'context'      => 'normal',
 				'priority'     => 'low',
 				'show_names'   => true,
 				'cmb_styles'   => true,
 				'show_in_rest' => true,
+			]
+		);
+
+		// Add field to select whether to insert geodata based on a map marker or on an address.
+		$cmb->add_field(
+			[
+				'id'           => $prefix . 'geodata_type',
+				'name'         => __( 'Geodata type', 'openkaarten-base' ),
+				'type'         => 'radio',
+				'options'      => [
+					'marker'  => __( 'Marker', 'openkaarten-base' ),
+					'address' => __( 'Address', 'openkaarten-base' ),
+				],
+				'default'      => 'marker',
+				'show_in_rest' => true,
+			]
+		);
+
+		$cmb->add_field(
+			[
+				'id'           => $prefix . 'coordinates',
+				'name'         => __( 'Coordinates', 'openkaarten-base' ),
+				'desc'         => __( 'Drag the marker after finding the right spot to set the exact coordinates', 'openkaarten-base' ),
+				'type'         => 'geomap',
+				'show_in_rest' => true,
+				'save_field'   => false,
+				'attributes' => [
+					'data-conditional-id'    => $prefix . 'geodata_type',
+					'data-conditional-value' => 'marker',
+				],
 			]
 		);
 
@@ -119,6 +150,11 @@ class Cmb2 {
 				$attributes = [
 					'readonly' => 'readonly',
 				];
+			} else {
+				$attributes = [
+					'data-conditional-id'    => $prefix . 'geodata_type',
+					'data-conditional-value' => 'address',
+				];
 			}
 
 			$cmb->add_field(
@@ -134,5 +170,29 @@ class Cmb2 {
 				]
 			);
 		}
+	}
+
+	public static function cmb2_render_geomap_field_type( $field, $escaped_value, $object_id ) {
+		// Get latitude and longitude of centre of the Netherlands as starting point.
+		$center_lat  = 52.1326;
+		$center_long = 5.2913;
+
+		wp_localize_script(
+			'owc_ok-openstreetmap',
+			'leaflet_vars',
+			[
+				'centerLat'   => esc_attr( $center_lat ),
+				'centerLong'  => esc_attr( $center_long ),
+				'minLat' 	  => esc_attr( 50.75 ),
+				'maxLat' 	  => esc_attr( 53.75 ),
+				'minLong' 	  => esc_attr( 3.25 ),
+				'maxLong' 	  => esc_attr( 7.25 ),
+				'defaultZoom' => 14,
+				'fitBounds'   => false,
+				'allowClick'  => true
+			]
+		);
+
+		echo '<div id="map" class="map"></div>';
 	}
 }
