@@ -148,7 +148,7 @@ class Cmb2 {
 				|| ( 'longitude' === $field_key )
 			) {
 				$attributes = [
-			//		'readonly' => 'readonly',
+					'readonly' => 'readonly',
 				];
 			} else {
 				$attributes = [
