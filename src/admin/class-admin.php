@@ -103,8 +103,6 @@ class Admin {
 	 * @return void
 	 */
 	public static function admin_enqueue_scripts() {
-		// Only include the script on the kaarten edit pages.
-		$screen = get_current_screen();
 
 		wp_enqueue_script(
 			'cmb2-conditional-logic',
@@ -224,6 +222,12 @@ class Admin {
 					$zipcode = sanitize_text_field( wp_unslash( $_POST['field_geo_zipcode'] ) );
 					$city    = sanitize_text_field( wp_unslash( $_POST['field_geo_city'] ) );
 					$country = sanitize_text_field( wp_unslash( $_POST['field_geo_country'] ) );
+
+					// Update post meta data.
+					update_post_meta( $post_id, 'field_geo_address', wp_slash( $address ) );
+					update_post_meta( $post_id, 'field_geo_zipcode', wp_slash( $zipcode ) );
+					update_post_meta( $post_id, 'field_geo_city', wp_slash( $city ) );
+					update_post_meta( $post_id, 'field_geo_country', wp_slash( $country ) );
 
 					$address .= ' ' . $zipcode . ' ' . $city . ' ' . $country;
 
