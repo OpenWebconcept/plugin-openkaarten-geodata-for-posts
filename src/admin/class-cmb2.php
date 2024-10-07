@@ -83,13 +83,13 @@ class Cmb2 {
 	public static function cmb2_location_geometry_fields() {
 		$prefix = 'location_geometry_';
 
-		$openkaarten_post_types = get_option( 'openkaarten_post_types' );
+		$openkaarten_geodata_post_types = get_option( 'openkaarten_geodata_post_types' );
 
 		$cmb = new_cmb2_box(
 			[
 				'id'           => $prefix . 'metabox',
 				'title'        => __( 'Geodata', 'openkaarten-base' ),
-				'object_types' => $openkaarten_post_types,
+				'object_types' => $openkaarten_geodata_post_types,
 				'context'      => 'normal',
 				'priority'     => 'low',
 				'show_names'   => true,
@@ -148,7 +148,7 @@ class Cmb2 {
 				|| ( 'longitude' === $field_key )
 			) {
 				$attributes = [
-					'readonly' => 'readonly',
+			//		'readonly' => 'readonly',
 				];
 			} else {
 				$attributes = [
@@ -177,22 +177,35 @@ class Cmb2 {
 		$center_lat  = 52.1326;
 		$center_long = 5.2913;
 
+		// Retrieve the current values of the latitude and longitude fields.
+		$latitude  = get_post_meta( $object_id, 'field_geo_latitude', true );
+		$longitude = get_post_meta( $object_id, 'field_geo_longitude', true );
+
+		$set_marker = false;
+
+		// If the latitude and longitude fields are filled, use these as the starting point.
+		if ( ! empty( $latitude ) && ! empty( $longitude ) ) {
+			$center_lat  = $latitude;
+			$center_long = $longitude;
+			$set_marker  = true;
+		}
+
+		// Enqueue the OpenStreetMap script.
 		wp_localize_script(
 			'owc_ok-openstreetmap',
 			'leaflet_vars',
 			[
 				'centerLat'   => esc_attr( $center_lat ),
 				'centerLong'  => esc_attr( $center_long ),
-				'minLat' 	  => esc_attr( 50.75 ),
-				'maxLat' 	  => esc_attr( 53.75 ),
-				'minLong' 	  => esc_attr( 3.25 ),
-				'maxLong' 	  => esc_attr( 7.25 ),
-				'defaultZoom' => 14,
+				'defaultZoom' => 10,
 				'fitBounds'   => false,
-				'allowClick'  => true
+				'allowClick'  => true,
+				'setMarker'   => $set_marker,
 			]
 		);
 
-		echo '<div id="map" class="map"></div>';
+		// Add the map and the hidden input field. This hidden input field is needed for the CMB2 Conditional Logic to work, but doesn't store any data itself.
+		echo '<div id="map" class="map"></div>
+		<input type="hidden" id="' . esc_attr( $field->args['id'] ) . '" name="' . esc_attr( $field->args['_name'] ) . '" data-conditional-id="location_geometry_geodata_type" data-conditional-value="marker">';
 	}
 }

@@ -55,10 +55,10 @@ class Openkaarten_Geodata_Controller extends \WP_REST_Posts_Controller {
 	 */
 	public function init() {
 		// Retrieve all post types that have a geodata field.
-		$openkaarten_post_types = get_option( 'openkaarten_post_types' );
+		$openkaarten_geodata_post_types = get_option( 'openkaarten_geodata_post_types' );
 
-		if ( ! empty( $openkaarten_post_types ) ) {
-			foreach ( $openkaarten_post_types as $post_type ) {
+		if ( ! empty( $openkaarten_geodata_post_types ) ) {
+			foreach ( $openkaarten_geodata_post_types as $post_type ) {
 				// Add the geodata field to the REST API response.
 				add_filter( 'rest_prepare_' . $post_type, [ $this, 'add_geodata_to_rest_api' ], 10, 3 );
 			}
@@ -112,9 +112,9 @@ class Openkaarten_Geodata_Controller extends \WP_REST_Posts_Controller {
 		$post_id = $post->ID;
 
 		// Check if post type is configured to have geodata.
-		$openkaarten_post_types = get_option( 'openkaarten_post_types' );
+		$openkaarten_geodata_post_types = get_option( 'openkaarten_geodata_post_types' );
 
-		if ( ! in_array( $post->post_type, $openkaarten_post_types, true ) ) {
+		if ( ! in_array( $post->post_type, $openkaarten_geodata_post_types, true ) ) {
 			return $data;
 		}
 

@@ -37,8 +37,8 @@ class Plugin {
 		/**
 		 * Register admin specific functionality.
 		 */
-		Admin::get_instance();
 		Cmb2::get_instance();
+		Admin::get_instance();
 		Settings::get_instance();
 
 		/**
