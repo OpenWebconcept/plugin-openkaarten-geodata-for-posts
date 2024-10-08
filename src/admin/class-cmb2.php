@@ -105,7 +105,7 @@ class Cmb2 {
 				'name'         => __( 'Geodata type', 'openkaarten-base' ),
 				'type'         => 'radio',
 				'options'      => [
-					'marker'  => __( 'Marker', 'openkaarten-base' ),
+					'marker'  => __( 'Marker(s)', 'openkaarten-base' ),
 					'address' => __( 'Address', 'openkaarten-base' ),
 				],
 				'default'      => 'marker',
@@ -117,7 +117,7 @@ class Cmb2 {
 			[
 				'id'           => $prefix . 'coordinates',
 				'name'         => __( 'Coordinates', 'openkaarten-base' ),
-				'desc'         => __( 'Drag the marker after finding the right spot to set the exact coordinates', 'openkaarten-base' ),
+				'desc'         => __( 'Click on the map to add a new marker. Drag the marker after adding to change the location of the marker. Right click on a marker to remove the marker from the map.', 'openkaarten-base' ),
 				'type'         => 'geomap',
 				'show_in_rest' => true,
 				'save_field'   => false,
@@ -177,17 +177,21 @@ class Cmb2 {
 		$center_lat  = 52.1326;
 		$center_long = 5.2913;
 
-		// Retrieve the current values of the latitude and longitude fields.
-		$latitude  = get_post_meta( $object_id, 'field_geo_latitude', true );
-		$longitude = get_post_meta( $object_id, 'field_geo_longitude', true );
-
+		// Retrieve the current values of the latitude and longitude of the markers from the geometry object.
 		$set_marker = false;
 
-		// If the latitude and longitude fields are filled, use these as the starting point.
-		if ( ! empty( $latitude ) && ! empty( $longitude ) ) {
-			$center_lat  = $latitude;
-			$center_long = $longitude;
-			$set_marker  = true;
+		$markers = [];
+		$geometry = get_post_meta( $object_id, 'geometry', true );
+		if ( ! empty( $geometry ) ) {
+			$geometry = json_decode( $geometry, true );
+			if ( ! empty( $geometry['geometry']['coordinates'] ) ) {
+				$center_lat  = $geometry['geometry']['coordinates'][0][1];
+				$center_long = $geometry['geometry']['coordinates'][0][0];
+				$set_marker  = true;
+
+				// Add the marker to the markers array.
+				$markers = $geometry['geometry']['coordinates'];
+			}
 		}
 
 		// Enqueue the OpenStreetMap script.
@@ -201,11 +205,13 @@ class Cmb2 {
 				'fitBounds'   => false,
 				'allowClick'  => true,
 				'setMarker'   => $set_marker,
+				'markers'     => $markers
 			]
 		);
 
 		// Add the map and the hidden input field. This hidden input field is needed for the CMB2 Conditional Logic to work, but doesn't store any data itself.
 		echo '<div id="map" class="map"></div>
+		<p class="cmb2-metabox-description">' . esc_attr( $field->args['desc'] ) . '</p>
 		<input type="hidden" id="' . esc_attr( $field->args['id'] ) . '" name="' . esc_attr( $field->args['_name'] ) . '" data-conditional-id="location_geometry_geodata_type" data-conditional-value="marker">';
 	}
 }

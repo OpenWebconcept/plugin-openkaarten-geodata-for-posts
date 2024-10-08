@@ -272,18 +272,41 @@ class Admin {
 		}
 
 		// Check nonce.
-		if ( ! isset( $_POST['openkaarten_cmb2_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['openkaarten_cmb2_nonce'] ) ), 'openkaarten_cmb2_nonce' ) ) {
+		if ( ! isset( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) ), 'nonce_CMB2phplocation_geometry_metabox' ) ) {
 			return;
 		}
 
-		// Make the geometry object.
-		$geometry = [];
-		if ( isset( $_POST['field_geo_latitude'] ) && isset( $_POST['field_geo_longitude'] ) ) {
-			$latitude  = sanitize_text_field( wp_unslash( $_POST['field_geo_latitude'] ) );
-			$longitude = sanitize_text_field( wp_unslash( $_POST['field_geo_longitude'] ) );
+		// Check if there is a location_geometry_coordinates input.
+		if ( ! isset( $_POST['location_geometry_coordinates'] ) ) {
+			return;
+		}
+
+		// Check if the input has one or multiple markers in it.
+		$marker_data = json_decode( stripslashes( $_POST['location_geometry_coordinates'] ), true );
+
+		if ( ! $marker_data ) {
+			return;
+		}
+
+		// Remove duplicates from the array where lat and lng are the same.
+		$marker_data = array_map( 'unserialize', array_unique( array_map( 'serialize', $marker_data ) ) );
+
+		// Make the geometry object based on the amount of markers.
+		if ( 1 === count( $marker_data ) ) {
+			$marker_data = $marker_data[0];
 			$geometry  = [
 				'type'        => 'Point',
-				'coordinates' => [ (float) $longitude, (float) $latitude ],
+				'coordinates' => [ (float) $marker_data['lng'], (float) $marker_data['lat'] ],
+			];
+		} else {
+			$geometry_coordinates = [];
+			foreach ( $marker_data as $marker ) {
+				$geometry_coordinates[] = [ (float) $marker['lng'], (float) $marker['lat'] ];
+			}
+
+			$geometry  = [
+				'type'        => 'MultiPoint',
+				'coordinates' => $geometry_coordinates,
 			];
 		}
 

@@ -1,7 +1,9 @@
 import L from "leaflet";
 
 // Retrieve the locations and map configuration from the global window object.
-const {centerLat, centerLong, defaultZoom, setMarker } = window.leaflet_vars;
+const { centerLat, centerLong, defaultZoom, setMarker, markers } = window.leaflet_vars;
+
+let markersArray = markers;
 
 // Set the map configuration.
 const config = {
@@ -30,8 +32,12 @@ window.onload = function() {
   }).addTo(map);
 
   // Add a marker to the map if the location is set.
+  console.log(markersArray);
   if (setMarker) {
-    addMarker( map, config.centerY, config.centerX );
+    // Add a marker for every location in the markers array.
+    markersArray.forEach( function( location ) {
+      addMarker( map, location[1], location[0], false );
+    } );
   }
 
   map.on( 'click', function (e) {
@@ -42,20 +48,10 @@ window.onload = function() {
     // Add a draggable marker to the map.
     addMarker( map, lat, lng );
     map.panTo( new L.LatLng( lat, lng ) );
-
-    // Update the form fields with the new coordinates.
-    updateGeoFields( lat, lng );
   } );
 };
 
 function addMarker( map, lat, lng ) {
-  // Remove all existing markers from the map.
-  map.eachLayer( function (layer) {
-    if (layer instanceof L.Marker) {
-      map.removeLayer( layer );
-    }
-  } );
-
   // Create a custom marker icon with the location color and icon.
   let customIconHtml = "<div style='background-color:" + location.color + ";' class='marker-pin'></div>";
   if (location.icon) {
@@ -80,18 +76,52 @@ function addMarker( map, lat, lng ) {
     var position = marker.getLatLng();
     marker.setLatLng( new L.LatLng( position.lat, position.lng ), {draggable: 'true'} );
     map.panTo( new L.LatLng( position.lat, position.lng ) );
-
-    // Update the form fields with the new coordinates.
-    updateGeoFields( position.lat, position.lng );
   } );
+
+  // Add an on right click to the marker to remove it.
+  marker.on( 'contextmenu', function (event) {
+    map.removeLayer( event.target );
+    updateMarkers( map );
+  }, this );
+
   map.addLayer( marker );
+
+  // Update markers after adding marker.
+  updateMarkers( map );
 }
 
-function updateGeoFields(lat, lng) {
-  if ( document.getElementById('field_geo_latitude') !== null ) {
-    document.getElementById( 'field_geo_latitude' ).value = lat;
-  }
-  if ( document.getElementById('field_geo_longitude') !== null ) {
-    document.getElementById( 'field_geo_longitude' ).value = lng;
-  }
+function updateMarkers( map ) {
+  // Retrieve all markers from the map.
+  let markers = map._layers;
+
+  // Filter out the markers from the map.
+  markers = Object.values( markers ).filter( function( marker ) {
+    return marker instanceof L.Marker;
+  } );
+
+  // Create an array with the marker coordinates.
+  let markerData = markers.map( function( marker ) {
+
+    if ( marker[0] && marker[1] ) {
+      return {
+        lat: marker[1],
+        lng: marker[0]
+      }
+    }
+
+    return {
+      lat: marker.getLatLng().lat,
+      lng: marker.getLatLng().lng
+    }
+  } );
+
+  // Pass the marker data to PHP.
+  updateGeoFields( markerData );
+}
+
+function updateGeoFields( markerData ) {
+  console.log(markerData);
+
+  // Update hidden CMB2 fields with the marker data.
+  jQuery( '#location_geometry_coordinates' ).val( JSON.stringify( markerData ) );
 }
