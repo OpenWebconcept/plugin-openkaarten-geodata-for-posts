@@ -61,7 +61,6 @@ class Admin {
 					continue;
 				}
 
-				add_action( 'save_post_' . $post_type, [ $this, 'save_geodata' ], 200, 1 );
 				add_action( 'save_post_' . $post_type, [ $this, 'save_geometry_object' ], 20, 1 );
 			}
 		}
@@ -195,31 +194,20 @@ class Admin {
 	}
 
 	/**
-	 * Save the address object.
+	 * Save the location geometry object.
 	 *
 	 * @param int $post_id The post ID.
 	 *
 	 * @return void
 	 */
-	public static function save_geodata( $post_id ) {
-		// Check if this is an auto-save or if the user doesn't have permission to edit
-		if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) {
-			return;
-		}
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return;
-		}
-
-		// Check if this is a revision, if so, abort
-		if ( wp_is_post_revision( $post_id ) ) {
+	public static function save_geometry_object( $post_id ) {
+		if ( wp_is_post_autosave( $post_id ) ) {
 			return;
 		}
 
 		// Check nonce.
-		// phpcs:ignore WordPress.Security.NonceVerification -- Disable nonce for now, because not working with Gutenberg.
-		// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf -- Disable nonce for now, because not working with Gutenberg.
-		if ( ! isset( $_POST['openkaarten_cmb2_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['openkaarten_cmb2_nonce'] ) ), 'openkaarten_cmb2_nonce' ) ) {
-			// return;.
+		if ( ! isset( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) ), 'nonce_CMB2phplocation_geometry_metabox' ) ) {
+			return;
 		}
 
 		// Retrieve the latitude and longitude by address.
@@ -245,69 +233,57 @@ class Admin {
 						$latitude  = sanitize_text_field( wp_unslash( $lat_long['latitude'] ) );
 						$longitude = sanitize_text_field( wp_unslash( $lat_long['longitude'] ) );
 					}
+
+					$geometry_coordinates = [ (float) $longitude, (float) $latitude ];
+
+					$geometry  = [
+						'type'        => 'Point',
+						'coordinates' => $geometry_coordinates,
+					];
 					break;
 				case 'marker':
-					$latitude  = sanitize_text_field( wp_unslash( $_POST['field_geo_latitude'] ) );
-					$longitude = sanitize_text_field( wp_unslash( $_POST['field_geo_longitude'] ) );
+					// Check if there is a location_geometry_coordinates input.
+					if ( ! isset( $_POST['location_geometry_coordinates'] ) ) {
+						return;
+					}
+
+					// Check if the input has one or multiple markers in it.
+					$marker_data = json_decode( stripslashes( $_POST['location_geometry_coordinates'] ), true );
+
+					if ( ! $marker_data ) {
+						return;
+					}
+
+					// Remove duplicates from the array where lat and lng are the same.
+					$marker_data = array_map( 'unserialize', array_unique( array_map( 'serialize', $marker_data ) ) );
+
+					// Make the geometry object based on the amount of markers.
+					if ( 1 === count( $marker_data ) ) {
+						$marker_data = $marker_data[0];
+						$geometry  = [
+							'type'        => 'Point',
+							'coordinates' => [ (float) $marker_data['lng'], (float) $marker_data['lat'] ],
+						];
+					} else {
+						$geometry_coordinates = [];
+						foreach ( $marker_data as $marker ) {
+							$geometry_coordinates[] = [ (float) $marker['lng'], (float) $marker['lat'] ];
+						}
+
+						$geometry  = [
+							'type'        => 'MultiPoint',
+							'coordinates' => $geometry_coordinates,
+						];
+					}
+
+					// Delete the address fields.
+					delete_post_meta( $post_id, 'field_geo_address' );
+					delete_post_meta( $post_id, 'field_geo_zipcode' );
+					delete_post_meta( $post_id, 'field_geo_city' );
+					delete_post_meta( $post_id, 'field_geo_country' );
+
 					break;
 			}
-		}
-
-		if ( ! empty( $latitude ) && ! empty( $longitude ) ) {
-			update_post_meta( $post_id, 'field_geo_latitude', wp_slash( $latitude ) );
-			update_post_meta( $post_id, 'field_geo_longitude', wp_slash( $longitude ) );
-		}
-	}
-
-	/**
-	 * Save the location geometry object.
-	 *
-	 * @param int $post_id The post ID.
-	 *
-	 * @return void
-	 */
-	public static function save_geometry_object( $post_id ) {
-		if ( wp_is_post_autosave( $post_id ) ) {
-			return;
-		}
-
-		// Check nonce.
-		if ( ! isset( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) ), 'nonce_CMB2phplocation_geometry_metabox' ) ) {
-			return;
-		}
-
-		// Check if there is a location_geometry_coordinates input.
-		if ( ! isset( $_POST['location_geometry_coordinates'] ) ) {
-			return;
-		}
-
-		// Check if the input has one or multiple markers in it.
-		$marker_data = json_decode( stripslashes( $_POST['location_geometry_coordinates'] ), true );
-
-		if ( ! $marker_data ) {
-			return;
-		}
-
-		// Remove duplicates from the array where lat and lng are the same.
-		$marker_data = array_map( 'unserialize', array_unique( array_map( 'serialize', $marker_data ) ) );
-
-		// Make the geometry object based on the amount of markers.
-		if ( 1 === count( $marker_data ) ) {
-			$marker_data = $marker_data[0];
-			$geometry  = [
-				'type'        => 'Point',
-				'coordinates' => [ (float) $marker_data['lng'], (float) $marker_data['lat'] ],
-			];
-		} else {
-			$geometry_coordinates = [];
-			foreach ( $marker_data as $marker ) {
-				$geometry_coordinates[] = [ (float) $marker['lng'], (float) $marker['lat'] ];
-			}
-
-			$geometry  = [
-				'type'        => 'MultiPoint',
-				'coordinates' => $geometry_coordinates,
-			];
 		}
 
 		$component = [

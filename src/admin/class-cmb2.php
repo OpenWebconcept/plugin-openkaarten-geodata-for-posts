@@ -141,20 +141,15 @@ class Cmb2 {
 		foreach ( $address_fields as $field_key => $field ) {
 			// Check if this field has a value and set it as readonly and disabled if it has.
 			$field_value = get_post_meta( self::$object_id, 'field_geo_' . $field_key, true );
-			$attributes  = [];
-			if (
-				! empty( $field_value )
-				|| ( 'latitude' === $field_key )
-				|| ( 'longitude' === $field_key )
-			) {
-				$attributes = [
+			$attributes = [
+				'data-conditional-id'    => $prefix . 'geodata_type',
+				'data-conditional-value' => 'address',
+			];
+
+			if ( 'latitude' === $field_key || 'longitude' === $field_key ) {
+				$attributes = array_merge( $attributes, [
 					'readonly' => 'readonly',
-				];
-			} else {
-				$attributes = [
-					'data-conditional-id'    => $prefix . 'geodata_type',
-					'data-conditional-value' => 'address',
-				];
+				] );
 			}
 
 			$cmb->add_field(
