@@ -42,6 +42,9 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	require_once __DIR__ . '/vendor/autoload.php';
 }
 
+// Initialize the OpenKaarten Base Functions class.
+Openkaarten_Base_Functions\Openkaarten_Base_Functions::init();
+
 require_once plugin_dir_path( __FILE__ ) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'class-autoloader.php';
 spl_autoload_register( array( '\Openkaarten_Geodata_Plugin\Autoloader', 'autoload' ) );
 /**
