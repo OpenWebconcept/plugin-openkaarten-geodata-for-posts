@@ -104,6 +104,15 @@ class Admin {
 	 */
 	public static function admin_enqueue_scripts() {
 
+		// Include custom.js file.
+		wp_enqueue_script(
+			'owc_ok_custom',
+			plugin_dir_url( __FILE__ ) . 'js/custom.js',
+			[ 'jquery', 'cmb2-scripts' ],
+			filemtime( plugin_dir_path( __FILE__ ) . 'js/custom.js' ),
+			true
+		);
+
 		wp_enqueue_script(
 			'cmb2-conditional-logic',
 			plugin_dir_url( __FILE__ ) . 'js/cmb2-conditional-logic.js',
