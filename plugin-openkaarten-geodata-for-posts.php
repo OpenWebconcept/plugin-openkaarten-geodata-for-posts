@@ -37,8 +37,13 @@ if ( ! defined( 'OWC_OPENKAARTEN_GEODATA_ASSETS_URL' ) ) {
 	define( 'OWC_OPENKAARTEN_GEODATA_ASSETS_URL', esc_url( trailingslashit( plugins_url( '', __FILE__ ) ) . 'build' ) );
 }
 
+// Load Composer autoloader if available.
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
+
 require_once plugin_dir_path( __FILE__ ) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'class-autoloader.php';
-spl_autoload_register( [ '\Openkaarten_Geodata_Plugin\Autoloader', 'autoload' ] );
+spl_autoload_register( array( '\Openkaarten_Geodata_Plugin\Autoloader', 'autoload' ) );
 /**
  * Begins execution of the plugin.
  */

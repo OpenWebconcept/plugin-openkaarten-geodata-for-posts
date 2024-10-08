@@ -10,6 +10,8 @@
 
 namespace Openkaarten_Geodata_Plugin\Admin;
 
+use Openkaarten_Base_Functions\Openkaarten_Base_Functions;
+
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -45,12 +47,12 @@ class Admin {
 	 * @return void
 	 */
 	private function __construct() {
-		add_action( 'admin_notices', ['Openkaarten_Geodata_Plugin\Admin\Admin', 'admin_notices' ] );
-		add_action( 'admin_init', ['Openkaarten_Geodata_Plugin\Admin\Admin', 'check_plugin_dependency' ] );
-		add_action( 'admin_enqueue_scripts', [ 'Openkaarten_Geodata_Plugin\Admin\Admin', 'admin_enqueue_scripts' ] );
+		add_action( 'admin_notices', array( 'Openkaarten_Geodata_Plugin\Admin\Admin', 'admin_notices' ) );
+		add_action( 'admin_init', array( 'Openkaarten_Geodata_Plugin\Admin\Admin', 'check_plugin_dependency' ) );
+		add_action( 'admin_enqueue_scripts', array( 'Openkaarten_Geodata_Plugin\Admin\Admin', 'admin_enqueue_scripts' ) );
 
 		// Add the CMB2 fields to the selected post types.
-		add_filter( 'openkaarten_base_post_types', ['Openkaarten_Geodata_Plugin\Admin\Settings', 'openkaarten_geodata_post_types' ], 5, 0 );
+		add_filter( 'openkaarten_base_post_types', array( 'Openkaarten_Geodata_Plugin\Admin\Settings', 'openkaarten_geodata_post_types' ), 5, 0 );
 
 		// Call save function for all selected post types.
 		$openkaarten_geodata_post_types = Settings::openkaarten_geodata_post_types();
@@ -61,7 +63,7 @@ class Admin {
 					continue;
 				}
 
-				add_action( 'save_post_' . $post_type, [ $this, 'save_geometry_object' ], 20, 1 );
+				add_action( 'save_post_' . $post_type, array( 'Openkaarten_Base_Functions\Openkaarten_Base_Functions', 'save_geometry_object' ), 20, 1 );
 			}
 		}
 	}
@@ -105,9 +107,9 @@ class Admin {
 
 		// Include custom.js file.
 		wp_enqueue_script(
-			'owc_ok_custom',
+			'owc_ok_geodata_custom',
 			plugin_dir_url( __FILE__ ) . 'js/custom.js',
-			[ 'jquery', 'cmb2-scripts' ],
+			array( 'jquery', 'cmb2-scripts' ),
 			filemtime( plugin_dir_path( __FILE__ ) . 'js/custom.js' ),
 			true
 		);
@@ -115,29 +117,22 @@ class Admin {
 		wp_enqueue_script(
 			'cmb2-conditional-logic',
 			plugin_dir_url( __FILE__ ) . 'js/cmb2-conditional-logic.js',
-			[ 'jquery', 'cmb2-scripts' ],
+			array( 'jquery', 'cmb2-scripts' ),
 			filemtime( plugin_dir_path( __FILE__ ) . 'js/cmb2-conditional-logic.js' ),
 			true
 		);
 
 		wp_enqueue_style(
-			'owc_ok-font-awesome',
-			'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',
-			[],
-			OWC_OPENKAARTEN_BASE_VERSION
-		);
-
-		wp_enqueue_style(
-			'owc_ok-openstreetmap',
+			'owc_ok_geodata-openstreetmap',
 			self::mix( '/styles/openstreetmap.css' ),
-			[],
+			array(),
 			OWC_OPENKAARTEN_BASE_VERSION
 		);
 
 		wp_enqueue_script(
-			'owc_ok-openstreetmap',
+			'owc_ok_geodata-openstreetmap',
 			self::mix( '/scripts/openstreetmap.js' ),
-			[],
+			array(),
 			OWC_OPENKAARTEN_BASE_VERSION,
 			true
 		);
@@ -191,149 +186,5 @@ class Admin {
 		$resources[ $path ] = @file_exists( $path ) && 0 < (int) @filesize( $path );
 
 		return $resources[ $path ];
-	}
-
-	/**
-	 * Save the location geometry object.
-	 *
-	 * @param int $post_id The post ID.
-	 *
-	 * @return void
-	 */
-	public static function save_geometry_object( $post_id ) {
-		if ( wp_is_post_autosave( $post_id ) ) {
-			return;
-		}
-
-		// Check nonce.
-		if ( ! isset( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) ), 'nonce_CMB2phplocation_geometry_metabox' ) ) {
-			return;
-		}
-
-		// Retrieve the latitude and longitude by address.
-		if ( isset( $_POST['location_geometry_geodata_type'] ) ) {
-
-			switch ( sanitize_text_field( wp_unslash( $_POST['location_geometry_geodata_type'] ) ) ) {
-				case 'address':
-					$address = sanitize_text_field( wp_unslash( $_POST['field_geo_address'] ) );
-					$zipcode = sanitize_text_field( wp_unslash( $_POST['field_geo_zipcode'] ) );
-					$city    = sanitize_text_field( wp_unslash( $_POST['field_geo_city'] ) );
-					$country = sanitize_text_field( wp_unslash( $_POST['field_geo_country'] ) );
-
-					// Update post meta data.
-					update_post_meta( $post_id, 'field_geo_address', wp_slash( $address ) );
-					update_post_meta( $post_id, 'field_geo_zipcode', wp_slash( $zipcode ) );
-					update_post_meta( $post_id, 'field_geo_city', wp_slash( $city ) );
-					update_post_meta( $post_id, 'field_geo_country', wp_slash( $country ) );
-
-					$address .= ' ' . $zipcode . ' ' . $city . ' ' . $country;
-
-					$lat_long = self::convert_address_to_latlong( sanitize_text_field( wp_unslash( $address ) ) );
-					if ( ! empty( $lat_long['latitude'] ) && ! empty( $lat_long['longitude'] ) ) {
-						$latitude  = sanitize_text_field( wp_unslash( $lat_long['latitude'] ) );
-						$longitude = sanitize_text_field( wp_unslash( $lat_long['longitude'] ) );
-					}
-
-					$geometry_coordinates = [ (float) $longitude, (float) $latitude ];
-
-					$geometry  = [
-						'type'        => 'Point',
-						'coordinates' => $geometry_coordinates,
-					];
-					break;
-				case 'marker':
-					// Check if there is a location_geometry_coordinates input.
-					if ( ! isset( $_POST['location_geometry_coordinates'] ) ) {
-						return;
-					}
-
-					// Check if the input has one or multiple markers in it.
-					$marker_data = json_decode( stripslashes( $_POST['location_geometry_coordinates'] ), true );
-
-					if ( ! $marker_data ) {
-						return;
-					}
-
-					// Remove duplicates from the array where lat and lng are the same.
-					$marker_data = array_map( 'unserialize', array_unique( array_map( 'serialize', $marker_data ) ) );
-
-					// Make the geometry object based on the amount of markers.
-					if ( 1 === count( $marker_data ) ) {
-						$marker_data = $marker_data[0];
-						$geometry  = [
-							'type'        => 'Point',
-							'coordinates' => [ (float) $marker_data['lng'], (float) $marker_data['lat'] ],
-						];
-					} else {
-						$geometry_coordinates = [];
-						foreach ( $marker_data as $marker ) {
-							$geometry_coordinates[] = [ (float) $marker['lng'], (float) $marker['lat'] ];
-						}
-
-						$geometry  = [
-							'type'        => 'MultiPoint',
-							'coordinates' => $geometry_coordinates,
-						];
-					}
-
-					// Delete the address fields.
-					delete_post_meta( $post_id, 'field_geo_address' );
-					delete_post_meta( $post_id, 'field_geo_zipcode' );
-					delete_post_meta( $post_id, 'field_geo_city' );
-					delete_post_meta( $post_id, 'field_geo_country' );
-
-					break;
-			}
-		}
-
-		$component = [
-			'type'       => 'Feature',
-			'properties' => [],
-			'geometry'   => $geometry,
-		];
-		$component = wp_json_encode( $component );
-
-		// Check if post meta exists and update or add the post meta.
-		if ( metadata_exists( 'post', $post_id, 'geometry' ) ) {
-			update_post_meta( $post_id, 'geometry', wp_slash( $component ) );
-		} else {
-			add_post_meta( $post_id, 'geometry', wp_slash( $component ), true );
-		}
-	}
-
-	/**
-	 * Get latitude and longitude from an address with OpenStreetMap.
-	 *
-	 * @param string $address The address.
-	 *
-	 * @return array|null
-	 */
-	public static function convert_address_to_latlong( $address ) {
-
-		if ( ! $address ) {
-			return null;
-		}
-
-		$address     = str_replace( ' ', '+', $address );
-		$osm_url     = 'https://nominatim.openstreetmap.org/search?q=' . $address . '&format=json&addressdetails=1';
-		$osm_address = wp_remote_get( $osm_url );
-
-		if ( ! $osm_address ) {
-			return null;
-		}
-
-		$osm_address = json_decode( $osm_address['body'] );
-
-		if ( ! $osm_address[0]->lat || ! $osm_address[0]->lon ) {
-			return null;
-		}
-
-		$latitude  = $osm_address[0]->lat;
-		$longitude = $osm_address[0]->lon;
-
-		return [
-			'latitude'  => $latitude,
-			'longitude' => $longitude,
-		];
 	}
 }

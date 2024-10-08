@@ -39,8 +39,8 @@ class Settings {
 	 * Initialize the class and set its properties.
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', ['Openkaarten_Geodata_Plugin\Admin\Settings', 'add_admin_menu' ] );
-		add_action( 'admin_init', ['Openkaarten_Geodata_Plugin\Admin\Settings', 'register_plugin_settings' ], 10 );
+		add_action( 'admin_menu', [ 'Openkaarten_Geodata_Plugin\Admin\Settings', 'add_admin_menu' ] );
+		add_action( 'admin_init', [ 'Openkaarten_Geodata_Plugin\Admin\Settings', 'register_plugin_settings' ], 10 );
 	}
 
 	/**
@@ -54,7 +54,7 @@ class Settings {
 			__( 'OpenKaarten Geodata Settings', 'openkaarten-geodata' ),
 			'manage_options',
 			'openkaarten-geodata-settings',
-			['Openkaarten_Geodata_Plugin\Admin\Settings', 'settings_page' ]
+			[ 'Openkaarten_Geodata_Plugin\Admin\Settings', 'settings_page' ]
 		);
 	}
 
