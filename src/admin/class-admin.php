@@ -63,7 +63,17 @@ class Admin {
 					continue;
 				}
 
-				add_action( 'save_post_' . $post_type, array( 'Openkaarten_Base_Functions\Openkaarten_Base_Functions', 'save_geometry_object' ), 20, 1 );
+				if ( class_exists( '\Openkaarten_Base_Functions\Openkaarten_Base_Functions' ) ) {
+					add_action(
+						'save_post_' . $post_type,
+						array(
+							'Openkaarten_Base_Functions\Openkaarten_Base_Functions',
+							'save_geometry_object',
+						),
+						20,
+						1
+					);
+				}
 			}
 		}
 	}

@@ -51,7 +51,17 @@ class Cmb2 {
 	 */
 	private function __construct() {
 		add_action( 'cmb2_init', array( 'Openkaarten_Geodata_Plugin\Admin\Cmb2', 'action_cmb2_init' ) );
-		add_action( 'cmb2_render_geomap', array( 'Openkaarten_Base_Functions\Openkaarten_Base_Functions', 'cmb2_render_geomap_field_type' ), 10, 5 );
+		if ( class_exists( '\Openkaarten_Base_Functions\Openkaarten_Base_Functions' ) ) {
+			add_action(
+				'cmb2_render_geomap',
+				array(
+					'Openkaarten_Base_Functions\Openkaarten_Base_Functions',
+					'cmb2_render_geomap_field_type',
+				),
+				10,
+				5
+			);
+		}
 	}
 
 	/**
