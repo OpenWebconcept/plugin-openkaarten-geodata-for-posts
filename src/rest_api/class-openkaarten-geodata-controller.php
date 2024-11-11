@@ -65,7 +65,7 @@ class Openkaarten_Geodata_Controller extends \WP_REST_Posts_Controller {
 		}
 
 		// Create custom filter to add geodata to the REST API response in a custom REST endpoint.
-		add_filter( 'ok_geo_rest_add_geodata', [ $this, 'add_geodata_to_custom_endpoint' ], 10, 2 );
+		add_filter( 'owc/openkaarten/geodata/rest-add-fields', [ $this, 'add_geodata_to_custom_endpoint' ], 10, 2 );
 	}
 
 	/**
