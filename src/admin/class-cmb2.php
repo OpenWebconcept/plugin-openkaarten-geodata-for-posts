@@ -83,7 +83,7 @@ class Cmb2 {
 			$post_id = sanitize_text_field( wp_unslash( $_POST['post_ID'] ) );
 		}
 
-		$openkaarten_geodata_post_types = get_option( 'openkaarten_geodata_post_types' );
+		$openkaarten_geodata_post_types = Settings::openkaarten_geodata_post_types();
 		Openkaarten_Base_Functions::cmb2_location_geometry_fields( $post_id, $openkaarten_geodata_post_types );
 		self::$object_id = (int) $post_id;
 	}
