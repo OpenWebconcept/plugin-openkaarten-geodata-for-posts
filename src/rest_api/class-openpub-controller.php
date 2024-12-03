@@ -9,6 +9,7 @@
 
 namespace Openkaarten_Geodata_Plugin\Rest_Api;
 
+use geoPHP\Exception\IOException;
 use geoPHP\geoPHP;
 use Openkaarten_Geodata_Plugin\Admin\Helper;
 use OWC\OpenPub\Base\Foundation\Plugin;
@@ -62,6 +63,7 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 
 		add_action( 'init', [ $this, 'init' ] );
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_filter( 'rest_pre_serve_request', [ $this, 'rest_change_output_format' ], 10, 4 );
 	}
 
 	/**
@@ -92,6 +94,17 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 				'args'                => $this->get_collection_params(),
 			]
 		);
+
+		register_rest_route(
+			$this->namespace,
+			$this->rest_base . '/(?P<output_format>[a-zA-Z0-9-]+)',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_items' ],
+				'permission_callback' => [ $this, 'get_items_permissions_check' ],
+				'args'                => $this->get_collection_params(),
+			]
+		);
 	}
 
 	/**
@@ -113,6 +126,17 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) {
+		// Check if output format exists in the processor types. If not, return an error.
+		$output_format = $request['output_format'] ?? 'geojson';
+		if ( ! empty( $output_format ) ) {
+			$processor_types        = geoPHP::getAdapterMap();
+			$processor_types_string = implode( ', ', array_keys( $processor_types ) );
+			if ( ! isset( $processor_types[ $output_format ] ) ) {
+				// translators: %s: List of valid output formats.
+				return new \WP_Error( 'rest_post_invalid_output_format', sprintf( __( 'Invalid output format. Use one of the following output formats: %s', 'openkaarten-geodata' ), $processor_types_string ), [ 'status' => 404 ] );
+			}
+		}
+
 		// Include OpenPub API config file and get the taxonomies for the plugin.
 		$openpub_plugin_dir_path = plugin_dir_path( __DIR__ ) . '../../openpub-base/';
 		$taxonomies_config_file  = $openpub_plugin_dir_path . 'config/taxonomies.php';
@@ -138,6 +162,7 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 			$args['posts_per_page'] = $request['per_page'];
 		}
 
+		// Set the post type to openpub-item and prepare the query.
 		$args['post_type'] = 'openpub-item';
 
 		$query_args = $this->prepare_items_query( $args, $request );
@@ -145,17 +170,30 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 		$posts_query  = new \WP_Query();
 		$query_result = $posts_query->query( $query_args );
 
+		// Retrieve the posts and prepare them for the response.
 		$posts = [];
 		foreach ( $query_result as $post ) {
 			$posts[] = $this->prepare_item_for_response( $post, $request );
 		}
 
+		// Create response in GeoJSON format.
 		$response = [
 			'type'     => 'FeatureCollection',
 			'features' => $posts,
 		];
 
-		return rest_ensure_response( $response );
+		$response = wp_json_encode( $response );
+
+		// Parse the response to the output format.
+		try {
+			$geom   = geoPHP::load( $response );
+			$output = $geom->out( $output_format );
+
+		} catch ( IOException $e ) {
+			$output = [];
+		}
+
+		return rest_ensure_response( $output );
 	}
 
 	/**
@@ -167,18 +205,9 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 	 * @return array|string The item data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$item_output = [ 'type' => 'Feature' ];
-
 		// Get the geometry for the item and add it to the output.
-		$geometry = get_post_meta( $item->ID, 'geometry', true );
-
-		// Check if the geometry is a valid geometry by using the geoPHP library.
-		if ( $geometry ) {
-			$geometry                = geoPHP::load( $geometry );
-			$item_output['geometry'] = json_decode( $geometry->out( 'json' ) );
-		} else {
-			$item_output['geometry'] = null;
-		}
+		$geometry    = get_post_meta( $item->ID, 'geometry', true );
+		$item_output = json_decode( $geometry, true );
 
 		// Loop through all the allowed fields and only add them to the output.
 		$base_properties = Helper::get_base_fields_for_rest_api( $item );
@@ -213,5 +242,48 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 		}
 
 		return $image;
+	}
+
+	/**
+	 * Changes the output format of the REST API response.
+	 *
+	 * @param bool              $served Whether the request has already been served.
+	 * @param \WP_REST_Response $result The response object.
+	 * @param \WP_REST_Request  $request The request object.
+	 * @param \WP_REST_Server   $server The server instance.
+	 *
+	 * @return bool Whether the request has already been served.
+	 */
+	public static function rest_change_output_format( $served, $result, $request, $server ) {
+		// Bail if the result is not an instance of WP_REST_Response.
+		if ( ! $result instanceof \WP_REST_Response ) {
+			return $served;
+		}
+
+		// Check if output format exists in the processor types.
+		$output_format = $request['output_format'];
+		if ( ! empty( $output_format ) ) {
+			$processor_types = geoPHP::getAdapterMap();
+			if ( ! isset( $processor_types[ $output_format ] ) ) {
+				return false;
+			}
+		}
+
+		$output_format = $request['output_format'] ?? 'geojson';
+
+		// Different output for json and geojson, otherwise it outputs with backslashes.
+		if ( in_array( $output_format, [ 'json', 'geojson' ], true ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The output is escaped in the WP_REST_Response class.
+			echo $result->get_data();
+			exit();
+		}
+
+		// Change the output headers for specific output formats.
+		$server->send_header( 'Content-Type', 'application/' . $output_format );
+		$server->send_header( 'Content-Disposition', 'attachment; filename=' . $request['id'] . '.' . $output_format );
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The output is escaped in the WP_REST_Response class.
+		echo $result->get_data();
+		exit();
 	}
 }
