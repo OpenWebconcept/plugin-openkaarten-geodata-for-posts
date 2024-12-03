@@ -10,48 +10,11 @@
 namespace Openkaarten_Geodata_Plugin\Admin;
 
 use OWC\OpenPub\Base\Foundation\Plugin;
-use OWC\OpenPub\Base\RestAPI\ItemFields\CommentField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\ConnectedField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\DateModified;
-use OWC\OpenPub\Base\RestAPI\ItemFields\DateModifiedGMT;
-use OWC\OpenPub\Base\RestAPI\ItemFields\DownloadsField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\EscapeElementField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\ExpiredField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\FeaturedImageField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\HighlightedItemField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\LinksField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\NotesField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\PortalURL;
-use OWC\OpenPub\Base\RestAPI\ItemFields\SeoPress;
-use OWC\OpenPub\Base\RestAPI\ItemFields\SynonymsField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\TaxonomyField;
-use OWC\OpenPub\Base\RestAPI\ItemFields\Yoast;
 
 /**
  * Helper class with several functions.
  */
 class Helper {
-
-	/**
-	 * The singleton instance of this class.
-	 *
-	 * @access private
-	 * @var    Helper|null $instance The singleton instance of this class.
-	 */
-	private static $instance = null;
-
-	/**
-	 * Get the singleton instance of this class.
-	 *
-	 * @return Helper The singleton instance of this class.
-	 */
-	public static function get_instance() {
-		if ( ! self::$instance ) {
-			self::$instance = new Helper();
-		}
-
-		return self::$instance;
-	}
 
 	/**
 	 * Get base fields for the REST API.
@@ -85,8 +48,15 @@ class Helper {
 	 */
 	public static function get_cmb2_fields_for_rest_api( $item, $open_pub_plugin ) {
 		// Include OpenPub API config file.
-		$openpub_plugin_dir_path = plugin_dir_path( __DIR__ ) . '../../plugin-openpub-base/';
-		$api_config              = require $openpub_plugin_dir_path . 'config/api.php';
+		$openpub_plugin_dir_path = plugin_dir_path( __DIR__ ) . '../../openpub-base/';
+		$api_config_file         = $openpub_plugin_dir_path . 'config/api.php';
+
+		// Check if file exists.
+		if ( ! file_exists( $api_config_file ) ) {
+			return [];
+		}
+
+		$api_config = require $api_config_file;
 
 		if ( ! is_array( $api_config ) || ! array_key_exists( 'models', $api_config ) ) {
 			return [];

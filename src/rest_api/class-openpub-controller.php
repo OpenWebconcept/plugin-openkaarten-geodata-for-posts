@@ -1,6 +1,6 @@
 <?php
 /**
- * The Openkaarten_Geodata_Controller_OpenPub class.
+ * The Openpub_Controller class.
  *
  * @package    Openkaarten_Geodata_Plugin
  * @subpackage Openkaarten_Geodata_Plugin/Rest_Api
@@ -14,15 +14,15 @@ use Openkaarten_Geodata_Plugin\Admin\Helper;
 use OWC\OpenPub\Base\Foundation\Plugin;
 
 /**
- * The Openkaarten_Controller class.
+ * The Openpub_Controller class.
  */
-class Openkaarten_Geodata_Controller_OpenPub extends \WP_REST_Posts_Controller {
+class Openpub_Controller extends \WP_REST_Posts_Controller {
 
 	/**
 	 * The singleton instance of this class.
 	 *
 	 * @access private
-	 * @var    Openkaarten_Geodata_Controller_OpenPub|null $instance The singleton instance of this class.
+	 * @var    Openpub_Controller|null $instance The singleton instance of this class.
 	 */
 	private static $instance = null;
 
@@ -37,11 +37,11 @@ class Openkaarten_Geodata_Controller_OpenPub extends \WP_REST_Posts_Controller {
 	/**
 	 * Get the singleton instance of this class.
 	 *
-	 * @return Openkaarten_Geodata_Controller_OpenPub The singleton instance of this class.
+	 * @return Openpub_Controller The singleton instance of this class.
 	 */
 	public static function get_instance() {
 		if ( ! self::$instance ) {
-			self::$instance = new Openkaarten_Geodata_Controller_OpenPub();
+			self::$instance = new Openpub_Controller();
 		}
 
 		return self::$instance;
@@ -54,7 +54,7 @@ class Openkaarten_Geodata_Controller_OpenPub extends \WP_REST_Posts_Controller {
 	 */
 	private function __construct() {
 		// Check if OpenPub plugin is installed. If not, return.
-		if ( ! is_plugin_active( 'plugin-openpub-base/openpub-base.php' ) ) {
+		if ( ! is_plugin_active( 'openpub-base/openpub-base.php' ) ) {
 			return;
 		}
 
@@ -114,8 +114,15 @@ class Openkaarten_Geodata_Controller_OpenPub extends \WP_REST_Posts_Controller {
 	 */
 	public function get_items( $request ) {
 		// Include OpenPub API config file and get the taxonomies for the plugin.
-		$openpub_plugin_dir_path = plugin_dir_path( __DIR__ ) . '../../plugin-openpub-base/';
-		$taxonomies              = require $openpub_plugin_dir_path . 'config/taxonomies.php';
+		$openpub_plugin_dir_path = plugin_dir_path( __DIR__ ) . '../../openpub-base/';
+		$taxonomies_config_file  = $openpub_plugin_dir_path . 'config/taxonomies.php';
+
+		// Check if file exists.
+		if ( file_exists( $taxonomies_config_file ) ) {
+			$taxonomies = require $taxonomies_config_file;
+		} else {
+			$taxonomies = [];
+		}
 
 		// Set the taxonomies for the OpenPub plugin.
 		$open_pub_plugin = new Plugin( 'openpub' );
