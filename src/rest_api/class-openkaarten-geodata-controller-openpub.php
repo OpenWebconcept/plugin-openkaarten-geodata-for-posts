@@ -73,7 +73,7 @@ class Openkaarten_Geodata_Controller_OpenPub extends \WP_REST_Posts_Controller {
 		parent::__construct( 'openpub-item' );
 
 		$this->namespace = 'owc/openkaarten/v1';
-		$this->rest_base = 'openpub-item';
+		$this->rest_base = 'openpub-items';
 	}
 
 	/**
