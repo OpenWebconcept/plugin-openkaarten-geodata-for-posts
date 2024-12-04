@@ -63,6 +63,7 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 
 		add_action( 'init', [ $this, 'init' ] );
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_filter( 'rest_pre_serve_request', [ $this, 'rest_change_output_format' ], 10, 4 );
 	}
 
 	/**
@@ -75,8 +76,6 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 
 		$this->namespace = 'owc/openkaarten/v1';
 		$this->rest_base = 'openpub-items';
-
-		add_filter( 'rest_pre_serve_request', [ $this, 'rest_change_output_format' ], 10, 4 );
 	}
 
 	/**
