@@ -63,7 +63,6 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 
 		add_action( 'init', [ $this, 'init' ] );
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-		add_filter( 'rest_pre_serve_request', [ $this, 'rest_change_output_format' ], 10, 4 );
 	}
 
 	/**
@@ -76,6 +75,8 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 
 		$this->namespace = 'owc/openkaarten/v1';
 		$this->rest_base = 'openpub-items';
+
+		add_filter( 'rest_pre_serve_request', [ $this, 'rest_change_output_format' ], 10, 4 );
 	}
 
 	/**
@@ -260,16 +261,20 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 			return $served;
 		}
 
-		// Check if output format exists in the processor types.
-		$output_format = $request['output_format'];
-		if ( ! empty( $output_format ) ) {
-			$processor_types = geoPHP::getAdapterMap();
-			if ( ! isset( $processor_types[ $output_format ] ) ) {
-				return false;
-			}
+		$request_route = $request->get_route();
+
+		// Check if the request route is the OpenPub items route.
+		if ( false === strpos( $request_route, 'owc/openkaarten/v1/openpub-items' ) ) {
+			return $served;
 		}
 
 		$output_format = $request['output_format'] ?? 'geojson';
+
+		// Check if output format exists in the processor types. If not, return an error.
+		$processor_types = geoPHP::getAdapterMap();
+		if ( ! isset( $processor_types[ $output_format ] ) ) {
+			return false;
+		}
 
 		// Different output for json and geojson, otherwise it outputs with backslashes.
 		if ( in_array( $output_format, [ 'json', 'geojson' ], true ) ) {
