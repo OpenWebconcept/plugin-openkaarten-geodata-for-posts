@@ -51,17 +51,6 @@ class Cmb2 {
 	 */
 	private function __construct() {
 		add_action( 'cmb2_init', array( 'Openkaarten_Geodata_Plugin\Admin\Cmb2', 'action_cmb2_init' ) );
-		if ( class_exists( '\Openkaarten_Base_Functions\Openkaarten_Base_Functions' ) ) {
-			add_action(
-				'cmb2_render_geomap',
-				array(
-					'Openkaarten_Base_Functions\Openkaarten_Base_Functions',
-					'cmb2_render_geomap_field_type',
-				),
-				10,
-				5
-			);
-		}
 	}
 
 	/**
@@ -83,7 +72,7 @@ class Cmb2 {
 			$post_id = sanitize_text_field( wp_unslash( $_POST['post_ID'] ) );
 		}
 
-		$openkaarten_geodata_post_types = get_option( 'openkaarten_geodata_post_types' );
+		$openkaarten_geodata_post_types = Settings::openkaarten_geodata_post_types();
 		Openkaarten_Base_Functions::cmb2_location_geometry_fields( $post_id, $openkaarten_geodata_post_types );
 		self::$object_id = (int) $post_id;
 	}

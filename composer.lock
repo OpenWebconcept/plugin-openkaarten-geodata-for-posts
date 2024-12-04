@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a87d0fcb962db660c453b9b19241c7fc",
+    "content-hash": "55203ce0e38804d9bf0ea19833a98311",
     "packages": [
         {
             "name": "composer/installers",
@@ -156,6 +156,113 @@
                 }
             ],
             "time": "2021-09-13T08:19:44+00:00"
+        },
+        {
+            "name": "richardkorthuis/geophp",
+            "version": "dev-development",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:richardkorthuis/geoPHP.git",
+                "reference": "1b3c91b3bbcc20ebd7401313e5d6825bc7c69931"
+            },
+            "require": {
+                "php": "^7.1|^8.0"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "2.*",
+                "phpbench/phpbench": "^1.0",
+                "phpstan/phpstan": "^1.4.0",
+                "phpunit/phpunit": "^8.0|^9.0",
+                "squizlabs/php_codesniffer": "3.*"
+            },
+            "suggest": {
+                "ext-geos": "GEOS allows more advanced operations"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "geoPHP\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "geoPHP\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "tests": [
+                    "@performance",
+                    "@bench",
+                    "@unit",
+                    "@test-input"
+                ],
+                "analyze": [
+                    "@cs-warning",
+                    "@stan"
+                ],
+                "all": [
+                    "@analyze",
+                    "echo \"Let's cool down a bit before testing benchmark ...\" && sleep 1",
+                    "@tests"
+                ],
+                "cs": [
+                    "phpcs"
+                ],
+                "cs-warning": [
+                    "phpcs -w"
+                ],
+                "cs-fix": [
+                    "phpcbf"
+                ],
+                "stan": [
+                    "phpstan analyze --no-progress"
+                ],
+                "unit": [
+                    "@putenv XDEBUG_MODE=coverage",
+                    "phpunit"
+                ],
+                "test-input": [
+                    "cd tests && php test.php && cd .."
+                ],
+                "performance": [
+                    "cd tests && php geometryPerformance.php && cd .."
+                ],
+                "bench": [
+                    "vendor/bin/phpbench run --report=aggregate --sleep 10000"
+                ]
+            },
+            "license": [
+                "GPL-2.0-or-later",
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Patrick Hayes",
+                    "role": "Original creator"
+                },
+                {
+                    "name": "Péter Báthory",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Open-source native PHP library for doing geometry operations. Can read and write a wide variety of formats: (E)WKT, (E)WKB, TWKB, GeoJSON, KML, GPX, GeoRSS. Works with all Simple-Feature geometries (Point, LineString, Polygon...) and can be used to get centroids, bounding-boxes, area, etc.",
+            "homepage": "https://github.com/funiq/geoPHP",
+            "keywords": [
+                "converter",
+                "geojson",
+                "geometry",
+                "geophp",
+                "gis",
+                "gpx",
+                "kml",
+                "linestring",
+                "polygon",
+                "twkb",
+                "wkb",
+                "wkt"
+            ],
+            "time": "2024-05-16T13:16:09+00:00"
         }
     ],
     "packages-dev": [
@@ -165,7 +272,7 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:OpenWebconcept/package-owc-openkaarten-functions.git",
-                "reference": "2487bcbd2124934488845a4d19cc61e727d5a9c0"
+                "reference": "5aa316fde1c30cdadc5ec1f4190d06279cb9dad4"
             },
             "require": {
                 "composer/installers": "~1.0"
@@ -192,7 +299,7 @@
             ],
             "description": "Adds global functions for OpenKaarten Base and OpenKaarten add-on plugins.",
             "homepage": "https://www.acato.nl",
-            "time": "2024-11-04T11:58:34+00:00"
+            "time": "2024-12-03T12:38:46+00:00"
         },
         {
             "name": "acato/wp-pre-commit-hook",
@@ -688,16 +795,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.11.0",
+            "version": "3.11.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
-                "reference": "70c08f8d20c0eb4fe56f26644dd94dae76a7f450"
+                "reference": "19473c30efe4f7b3cd42522d0b2e6e7f243c6f87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/70c08f8d20c0eb4fe56f26644dd94dae76a7f450",
-                "reference": "70c08f8d20c0eb4fe56f26644dd94dae76a7f450",
+                "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/19473c30efe4f7b3cd42522d0b2e6e7f243c6f87",
+                "reference": "19473c30efe4f7b3cd42522d0b2e6e7f243c6f87",
                 "shasum": ""
             },
             "require": {
@@ -764,7 +871,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-11-12T09:53:29+00:00"
+            "time": "2024-11-16T12:02:36+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
@@ -836,6 +943,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "richardkorthuis/geophp": 20,
         "acato/openkaarten-base-functions": 20
     },
     "prefer-stable": false,
