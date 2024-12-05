@@ -4,8 +4,43 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "55203ce0e38804d9bf0ea19833a98311",
+    "content-hash": "7cb190b11d28e51b1149d675f9ca5e2f",
     "packages": [
+        {
+            "name": "acato/openkaarten-base-functions",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:OpenWebconcept/package-owc-openkaarten-functions.git",
+                "reference": "5aa316fde1c30cdadc5ec1f4190d06279cb9dad4"
+            },
+            "require": {
+                "composer/installers": "~1.0"
+            },
+            "require-dev": {
+                "acato/wp-pre-commit-hook": "*",
+                "phpcompatibility/phpcompatibility-wp": "*"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Openkaarten_Base_Functions\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Eyal Beker",
+                    "email": "eyal@acato.nl"
+                }
+            ],
+            "description": "Adds global functions for OpenKaarten Base and OpenKaarten add-on plugins.",
+            "homepage": "https://www.acato.nl",
+            "time": "2024-12-03T12:38:46+00:00"
+        },
         {
             "name": "composer/installers",
             "version": "v1.12.0",
@@ -266,41 +301,6 @@
         }
     ],
     "packages-dev": [
-        {
-            "name": "acato/openkaarten-base-functions",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "git@github.com:OpenWebconcept/package-owc-openkaarten-functions.git",
-                "reference": "5aa316fde1c30cdadc5ec1f4190d06279cb9dad4"
-            },
-            "require": {
-                "composer/installers": "~1.0"
-            },
-            "require-dev": {
-                "acato/wp-pre-commit-hook": "*",
-                "phpcompatibility/phpcompatibility-wp": "*"
-            },
-            "default-branch": true,
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Openkaarten_Base_Functions\\": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Eyal Beker",
-                    "email": "eyal@acato.nl"
-                }
-            ],
-            "description": "Adds global functions for OpenKaarten Base and OpenKaarten add-on plugins.",
-            "homepage": "https://www.acato.nl",
-            "time": "2024-12-03T12:38:46+00:00"
-        },
         {
             "name": "acato/wp-pre-commit-hook",
             "version": "1.0.0",

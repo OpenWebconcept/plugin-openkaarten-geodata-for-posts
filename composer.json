@@ -26,10 +26,10 @@
     ],
     "require" : {
         "composer/installers" : "~1.0",
-        "richardkorthuis/geophp": "dev-development"
+        "richardkorthuis/geophp": "dev-development",
+        "acato/openkaarten-base-functions": "dev-master"
     },
     "require-dev" : {
-        "acato/openkaarten-base-functions": "dev-master",
         "acato/wp-pre-commit-hook": "*",
         "phpcompatibility/phpcompatibility-wp": "*"
     },
