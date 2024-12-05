@@ -10,8 +10,6 @@
 
 namespace Openkaarten_Geodata_Plugin\Admin;
 
-use Openkaarten_Base_Functions\Openkaarten_Base_Functions;
-
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -123,5 +121,85 @@ class Admin {
 			filemtime( plugin_dir_path( __FILE__ ) . 'js/custom.js' ),
 			true
 		);
+
+		wp_enqueue_style(
+			'owc_ok-openstreetmap-base',
+			self::mix( '/styles/openstreetmap-base.css' ),
+			[],
+			OWC_OPENKAARTEN_GEODATA_VERSION
+		);
+
+		wp_enqueue_script(
+			'owc_ok-openstreetmap-base',
+			self::mix( '/scripts/openstreetmap-base.js' ),
+			[],
+			OWC_OPENKAARTEN_GEODATA_VERSION,
+			true
+		);
+
+		wp_enqueue_style(
+			'owc_ok-openstreetmap-geodata',
+			self::mix( '/styles/openstreetmap-geodata.css' ),
+			[],
+			OWC_OPENKAARTEN_GEODATA_VERSION
+		);
+
+		wp_enqueue_script(
+			'owc_ok-openstreetmap-geodata',
+			self::mix( '/scripts/openstreetmap-geodata.js' ),
+			[],
+			OWC_OPENKAARTEN_GEODATA_VERSION,
+			true
+		);
+	}
+
+	/**
+	 * Just a little helper to get filenames from the mix-manifest file.
+	 *
+	 * @param string $path to file.
+	 *
+	 * @return string|null
+	 */
+	private static function mix( string $path ): ?string {
+		static $manifest;
+		if ( empty( $manifest ) ) {
+			$manifest = OWC_OPENKAARTEN_GEODATA_ABSPATH . '/build/mix-manifest.json';
+
+			if ( ! self::has_resource( $manifest ) ) {
+				return OWC_OPENKAARTEN_GEODATA_ASSETS_URL . $path;
+			}
+
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- We need to read the file.
+			$manifest = json_decode( file_get_contents( $manifest ), true );
+		}
+
+		// We need to set the `/` in front of the `$path` due to how the mix-manifest.json file is saved.
+		if ( ! str_starts_with( $path, '/' ) ) {
+			$path = '/' . $path;
+		}
+
+		return ! empty( $manifest[ $path ] ) ? untrailingslashit( OWC_OPENKAARTEN_GEODATA_ASSETS_URL ) . $manifest[ $path ] : null;
+	}
+
+	/**
+	 * Checks if file exists and if the file is populated, so we don't enqueue empty files.
+	 *
+	 * @param string $path ABSPATH to file.
+	 *
+	 * @return bool|mixed
+	 */
+	private static function has_resource( $path ) {
+
+		static $resources = null;
+
+		if ( isset( $resources[ $path ] ) ) {
+			return $resources[ $path ];
+		}
+
+		// Check if resource exists and has content.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$resources[ $path ] = @file_exists( $path ) && 0 < (int) @filesize( $path );
+
+		return $resources[ $path ];
 	}
 }

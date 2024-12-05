@@ -27,7 +27,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-define( 'OWC_OPENKAARTEN_GEODATA_VERSION', '0.1.0' );
+define( 'OWC_OPENKAARTEN_GEODATA_VERSION', '0.1.1' );
 
 if ( ! defined( 'OWC_OPENKAARTEN_GEODATA_ABSPATH' ) ) {
 	define( 'OWC_OPENKAARTEN_GEODATA_ABSPATH', plugin_dir_path( __FILE__ ) );
