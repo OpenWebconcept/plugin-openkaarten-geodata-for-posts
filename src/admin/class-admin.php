@@ -122,6 +122,14 @@ class Admin {
 			true
 		);
 
+		wp_enqueue_script(
+			'cmb2-conditional-logic',
+			plugin_dir_url( __FILE__ ) . 'js/cmb2-conditional-logic.js',
+			array( 'jquery', 'cmb2-scripts' ),
+			filemtime( plugin_dir_path( __FILE__ ) . 'js/cmb2-conditional-logic.js' ),
+			true
+		);
+
 		wp_enqueue_style(
 			'owc_ok-openstreetmap-base',
 			self::mix( '/styles/openstreetmap-base.css' ),
