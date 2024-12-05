@@ -25,6 +25,9 @@ In all scenarios the OpenKaarten Geodata plugin needs to have the following inst
 * [OpenPub Base](https://github.com/OpenWebconcept/plugin-openpub-base/)
 * [CMB2](https://wordpress.org/plugins/cmb2/)
 * [OpenKaarten Geodata](https://github.com/OpenWebconcept/plugin-openkaarten-geodata-for-posts)
+
+Furthermore, the OpenKaarten Base plugin needs a package with base functions to be installed. This package can be installed via composer (see instructions further on) and is called:
+
 * [OpenKaarten Base Functions](https://github.com/OpenWebconcept/package-owc-openkaarten-functions/)
 
 With this installed you can use the OpenKaarten Geodata plugin in your WordPress website.
@@ -46,11 +49,13 @@ At this point manual installation is not supported, because of composer dependen
 
 ### Composer installation
 
-1. `composer source git@github.com:OpenWebconcept/plugin-openkaarten-geodata-for-posts.git`
-2. `composer require acato/openkaarten-geodata-for-posts`
-3. `cd /wp-content/plugins/openkaarten-geodata-for-posts`
-4. `npm install && npm run build`
-5. Activate the OpenKaarten Geodata Plugin through the 'Plugins' menu in WordPress.
+1. `composer source git@github.com:OpenWebconcept/package-owc-openkaarten-functions.git`
+2. `composer require acato/openkaarten-base-functions`
+3. `composer source git@github.com:OpenWebconcept/plugin-openkaarten-geodata-for-posts.git`
+4. `composer require acato/openkaarten-geodata-for-posts`
+5. `cd /wp-content/plugins/openkaarten-geodata-for-posts`
+6. `npm install && npm run build`
+7. Activate the OpenKaarten Geodata Plugin through the 'Plugins' menu in WordPress.
 
 ## Usage
 
