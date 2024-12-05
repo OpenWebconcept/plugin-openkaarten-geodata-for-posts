@@ -24,7 +24,7 @@ In all scenarios the OpenKaarten Geodata plugin needs to have the following inst
 * [WordPress](https://wordpress.org/)
 * [OpenPub Base](https://github.com/OpenWebconcept/plugin-openpub-base/)
 * [CMB2](https://wordpress.org/plugins/cmb2/)
-* [OpenKaarten Geodata]()
+* [OpenKaarten Geodata](https://github.com/OpenWebconcept/plugin-openkaarten-geodata-for-posts)
 
 With this installed you can use the OpenKaarten Geodata plugin in your WordPress website.
 
