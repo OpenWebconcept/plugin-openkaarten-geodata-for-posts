@@ -1,11 +1,11 @@
 @import 'leaflet/dist/leaflet.css';
 
-#map {
+#map-geodata {
 	width: 100%;
 	height: 600px;
 }
 
-.marker-pin {
+#map-geodata .marker-pin {
 	width: 30px;
 	height: 30px;
 	border-radius: 50% 50% 50% 0;

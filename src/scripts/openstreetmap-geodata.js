@@ -18,7 +18,7 @@ const config = {
 
 // Create the map with the specified configuration.
 window.onload = function() {
-  const map = new L.Map('map', {
+  const map = new L.Map('map-geodata', {
     center: [config.centerY, config.centerX],
     zoom: config.defaultZoom,
     minZoom: config.minimumZoom,
@@ -32,7 +32,6 @@ window.onload = function() {
   }).addTo(map);
 
   // Add a marker to the map if the location is set.
-  console.log(markersArray);
   if (setMarker) {
     // Add a marker for every location in the markers array.
     markersArray.forEach( function( location ) {
@@ -120,8 +119,6 @@ function updateMarkers( map ) {
 }
 
 function updateGeoFields( markerData ) {
-  console.log(markerData);
-
   // Update hidden CMB2 fields with the marker data.
   jQuery( '#location_geometry_coordinates' ).val( JSON.stringify( markerData ) );
 }
