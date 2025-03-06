@@ -165,6 +165,20 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 		// Set the post type to openpub-item and prepare the query.
 		$args['post_type'] = 'openpub-item';
 
+		// Check if OpenPub item has geometry data and geometry is not empty.
+		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- We need to check for the existence of the geometry field.
+		$args['meta_query'] = [
+			[
+				'key'     => 'geometry',
+				'compare' => 'EXISTS',
+			],
+			[
+				'key'     => 'geometry',
+				'compare' => '!=',
+				'value'   => '',
+			],
+		];
+
 		$query_args = $this->prepare_items_query( $args, $request );
 
 		$posts_query  = new \WP_Query();
