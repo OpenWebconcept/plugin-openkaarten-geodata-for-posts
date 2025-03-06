@@ -148,9 +148,19 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 			$taxonomies = [];
 		}
 
+		$connections_config_file = $openpub_plugin_dir_path . 'config/p2p_connections.php';
+
+		// Check if file exists.
+		if ( file_exists( $connections_config_file ) ) {
+			$connections = require $connections_config_file;
+		} else {
+			$connections = [];
+		}
+
 		// Set the taxonomies for the OpenPub plugin.
 		$open_pub_plugin = new Plugin( 'openpub' );
 		$open_pub_plugin->config->set( 'taxonomies', $taxonomies );
+		$open_pub_plugin->config->set( 'p2p_connections', $connections );
 		self::$open_pub_plugin = $open_pub_plugin;
 
 		// Retrieve the list of registered collection query parameters.
