@@ -33,7 +33,7 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 	 * @access private
 	 * @var    Plugin|null $open_pub_plugin The OpenPub plugin instance.
 	 */
-	private static $open_pub_plugin = null;
+	private $open_pub_plugin = null;
 
 	/**
 	 * Get the singleton instance of this class.
@@ -158,10 +158,8 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 		}
 
 		// Set the taxonomies for the OpenPub plugin.
-		$open_pub_plugin = new Plugin( 'openpub' );
-		$open_pub_plugin->config->set( 'taxonomies', $taxonomies );
-		$open_pub_plugin->config->set( 'p2p_connections', $connections );
-		self::$open_pub_plugin = $open_pub_plugin;
+		$this->open_pub_plugin->config->set( 'taxonomies', $taxonomies );
+		$this->open_pub_plugin->config->set( 'p2p_connections', $connections );
 
 		// Retrieve the list of registered collection query parameters.
 		$registered = $this->get_collection_params();
@@ -235,7 +233,7 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 
 		// Loop through all the allowed fields and only add them to the output.
 		$base_properties = Helper::get_base_fields_for_rest_api( $item );
-		$cmb2_properties = Helper::get_cmb2_fields_for_rest_api( $item, self::$open_pub_plugin );
+		$cmb2_properties = Helper::get_cmb2_fields_for_rest_api( $item, $this->open_pub_plugin );
 		$item_properties = array_merge( $base_properties, $cmb2_properties );
 
 		if ( ! empty( $item_properties ) ) {
@@ -313,5 +311,10 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The output is escaped in the WP_REST_Response class.
 		echo $result->get_data();
 		exit();
+	}
+
+	public function setOpenPubPlugin(Plugin $plugin)
+	{
+		$this->open_pub_plugin = $plugin;
 	}
 }

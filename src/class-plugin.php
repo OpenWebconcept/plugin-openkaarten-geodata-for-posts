@@ -44,6 +44,10 @@ class Plugin {
 		/**
 		 * Register REST API specific functionality.
 		 */
-		Rest_Api\Openpub_Controller::get_instance();
+		$this->controller = Rest_Api\Openpub_Controller::get_instance();
+
+		add_action('owc/openpub-base/plugin', function ($plugin) {;
+			$this->controller->setOpenPubPlugin($plugin);
+		});
 	}
 }
