@@ -59,9 +59,9 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 			return;
 		}
 
-		parent::__construct( 'openpub-item' );
+		// Note: Below we make sure that we don't call the constructor before the OpenPub plugin registered its post types.
+		add_action( 'init', [ $this, 'init' ], 11 );
 
-		add_action( 'init', [ $this, 'init' ] );
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
 		add_filter( 'rest_pre_serve_request', [ $this, 'rest_change_output_format' ], 10, 4 );
 	}
