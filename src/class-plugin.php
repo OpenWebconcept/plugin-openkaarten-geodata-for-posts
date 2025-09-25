@@ -46,8 +46,11 @@ class Plugin {
 		 */
 		$this->controller = Rest_Api\Openpub_Controller::get_instance();
 
-		add_action('owc/openpub-base/plugin', function ($plugin) {;
-			$this->controller->setOpenPubPlugin($plugin);
-		});
+		add_action(
+			'owc/openpub-base/plugin',
+			function ( $plugin ) {
+				$this->controller->setOpenPubPlugin( $plugin );
+			}
+		);
 	}
 }

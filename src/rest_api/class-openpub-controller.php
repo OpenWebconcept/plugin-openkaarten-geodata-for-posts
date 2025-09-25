@@ -313,8 +313,14 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 		exit();
 	}
 
-	public function setOpenPubPlugin(Plugin $plugin)
-	{
+	/**
+	 * Set the OpenPub plugin instance.
+	 *
+	 * @param Plugin $plugin The OpenPub plugin instance.
+	 *
+	 * @return void
+	 */
+	public function setOpenPubPlugin( Plugin $plugin ) {
 		$this->open_pub_plugin = $plugin;
 	}
 }
