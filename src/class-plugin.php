@@ -25,6 +25,9 @@ use Openkaarten_Geodata_Plugin\Admin\Admin;
  * @author     Acato <eyal@acato.nl>
  */
 class Plugin {
+
+	protected Rest_Api\Openpub_Controller $controller;
+
 	/**
 	 * Define the core functionality of the plugin.
 	 */
