@@ -10,6 +10,8 @@
 
 namespace Openkaarten_Geodata_Plugin\Admin;
 
+use Openkaarten_Base_Functions;
+
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -64,10 +66,18 @@ class Admin {
 				if ( class_exists( '\Openkaarten_Base_Functions\Openkaarten_Base_Functions' ) ) {
 					add_action(
 						'save_post_' . $post_type,
-						array(
-							'Openkaarten_Base_Functions\Openkaarten_Base_Functions',
-							'save_geometry_object',
-						),
+						function ( $post_id ) {
+							// Check nonce - this is needed, otherwise $_POST is empty.
+							if ( ! isset( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) ||
+								! wp_verify_nonce(
+									sanitize_text_field( wp_unslash( $_POST['nonce_CMB2phplocation_geometry_metabox'] ) ),
+									'nonce_CMB2phplocation_geometry_metabox'
+								) ) {
+								return;
+							}
+
+							Openkaarten_Base_Functions\Openkaarten_Base_Functions::save_geometry_object( $post_id );
+						},
 						20,
 						1
 					);
