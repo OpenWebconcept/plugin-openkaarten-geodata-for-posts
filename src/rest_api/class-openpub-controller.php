@@ -178,16 +178,13 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 		$args['meta_query'] = [
 			'relation' => 'AND',
 			[
-				'relation' => 'AND',
-				[
-					'key'     => 'geometry',
-					'compare' => 'EXISTS',
-				],
-				[
-					'key'     => 'geometry',
-					'compare' => '!=',
-					'value'   => '',
-				],
+				'key'     => 'geometry',
+				'compare' => 'EXISTS',
+			],
+			[
+				'key'     => 'geometry',
+				'compare' => '!=',
+				'value'   => '',
 			],
 			// Check if OpenPub item is not yet expired.
 			[
