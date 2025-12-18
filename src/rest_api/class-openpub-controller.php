@@ -176,6 +176,7 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 		// Check if OpenPub item has geometry data and geometry is not empty.
 		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- We need to check for the existence of the geometry field.
 		$args['meta_query'] = [
+			'relation' => 'AND',
 			[
 				'key'     => 'geometry',
 				'compare' => 'EXISTS',
@@ -184,6 +185,20 @@ class Openpub_Controller extends \WP_REST_Posts_Controller {
 				'key'     => 'geometry',
 				'compare' => '!=',
 				'value'   => '',
+			],
+			// Check if OpenPub item is not yet expired.
+			[
+				'relation' => 'OR',
+				[
+					'key'     => '_owc_openpub_expirationdate',
+					'compare' => 'NOT EXISTS',
+				],
+				[
+					'key'     => '_owc_openpub_expirationdate',
+					'value'   => time(),
+					'compare' => '>=',
+					'type'    => 'NUMERIC',
+				],
 			],
 		];
 
