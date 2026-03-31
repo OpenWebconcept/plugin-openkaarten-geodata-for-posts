@@ -10,23 +10,9 @@
             "role": "Backend WordPress Developer"
         }
     ],
-    "repositories": [
-        {
-            "type": "git",
-            "url": "git@bitbucket.org:acato/wp-pre-commit-hook.git"
-        },
-        {
-            "type": "git",
-            "url": "git@github.com:richardkorthuis/geoPHP.git"
-        },
-        {
-            "type": "git",
-            "url": "git@github.com:OpenWebconcept/package-owc-openkaarten-functions.git"
-        }
-    ],
     "require" : {
         "composer/installers" : "^1.0 || ^2.0",
-        "richardkorthuis/geophp": "dev-development",
+        "acato-plugins/geophp": "dev-development",
         "acato/openkaarten-base-functions": "dev-master"
     },
     "require-dev" : {
