@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "79ff4553755f388c9523e0a7b1b7b672",
+    "content-hash": "13c280521bceef8eef353546397e1877",
     "packages": [
         {
             "name": "acato-plugins/geophp",
-            "version": "dev-development",
+            "version": "2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/acato-plugins/geoPHP.git",
@@ -33,7 +33,6 @@
             "suggest": {
                 "ext-geos": "GEOS allows more advanced operations"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -78,16 +77,16 @@
         },
         {
             "name": "acato/openkaarten-base-functions",
-            "version": "dev-master",
+            "version": "0.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/OpenWebconcept/package-owc-openkaarten-functions.git",
-                "reference": "1956006006da4f15bda3750389c443fec0c628f3"
+                "reference": "561d444a17d307cd29d8c7696798d36e997eff54"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/OpenWebconcept/package-owc-openkaarten-functions/zipball/1956006006da4f15bda3750389c443fec0c628f3",
-                "reference": "1956006006da4f15bda3750389c443fec0c628f3",
+                "url": "https://api.github.com/repos/OpenWebconcept/package-owc-openkaarten-functions/zipball/561d444a17d307cd29d8c7696798d36e997eff54",
+                "reference": "561d444a17d307cd29d8c7696798d36e997eff54",
                 "shasum": ""
             },
             "require": {
@@ -97,7 +96,6 @@
                 "acato/wp-pre-commit-hook": "*",
                 "phpcompatibility/phpcompatibility-wp": "*"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -118,9 +116,9 @@
             "homepage": "https://www.acato.nl",
             "support": {
                 "issues": "https://github.com/OpenWebconcept/package-owc-openkaarten-functions/issues",
-                "source": "https://github.com/OpenWebconcept/package-owc-openkaarten-functions/tree/0.1.3"
+                "source": "https://github.com/OpenWebconcept/package-owc-openkaarten-functions/tree/0.1.4"
             },
-            "time": "2026-02-19T12:55:21+00:00"
+            "time": "2026-03-31T07:36:07+00:00"
         },
         {
             "name": "composer/installers",
@@ -952,10 +950,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "acato-plugins/geophp": 20,
-        "acato/openkaarten-base-functions": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

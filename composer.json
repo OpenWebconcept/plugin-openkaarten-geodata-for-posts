@@ -12,8 +12,8 @@
     ],
     "require" : {
         "composer/installers" : "^1.0 || ^2.0",
-        "acato-plugins/geophp": "dev-development",
-        "acato/openkaarten-base-functions": "dev-master"
+        "acato-plugins/geophp": "*",
+        "acato/openkaarten-base-functions": "*"
     },
     "require-dev" : {
         "acato/wp-pre-commit-hook": "*",
