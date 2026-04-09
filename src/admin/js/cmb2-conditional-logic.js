@@ -282,13 +282,13 @@ jQuery( document ).ready( function( $ ) {
   switch( true ) {
 
       // init for classic editor
-    case $( '#post' ).length > 0:
-      CMB2ConditionalsInit( '#post', '#post .cmb2-wrap' );
+    case $( '#post .cmb2-wrap' ).length > 0:
+      CMB2ConditionalsInit( '#post .cmb2-wrap', '#post .cmb2-wrap' );
       break;
 
       // init for gutenberg editor and options pages
-    case $( '#wpwrap' ).length > 0:
-      CMB2ConditionalsInit( '#wpwrap', '#wpwrap .cmb2-wrap' );
+    case $( '#wpwrap .cmb2-wrap' ).length > 0:
+      CMB2ConditionalsInit( '#wpwrap .cmb2-wrap', '#wpwrap .cmb2-wrap' );
       break;
 
   }
