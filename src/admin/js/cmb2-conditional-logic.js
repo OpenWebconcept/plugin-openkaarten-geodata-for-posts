@@ -283,12 +283,12 @@ jQuery( document ).ready( function( $ ) {
 
       // init for classic editor
     case $( '#post .cmb2-wrap' ).length > 0:
-      CMB2ConditionalsInit( '#post', '#post .cmb2-wrap' );
+      CMB2ConditionalsInit( '#post .cmb2-wrap', '#post .cmb2-wrap' );
       break;
 
       // init for gutenberg editor and options pages
     case $( '#wpwrap .cmb2-wrap' ).length > 0:
-      CMB2ConditionalsInit( '#wpwrap', '#wpwrap .cmb2-wrap' );
+      CMB2ConditionalsInit( '#wpwrap .cmb2-wrap', '#wpwrap .cmb2-wrap' );
       break;
 
   }

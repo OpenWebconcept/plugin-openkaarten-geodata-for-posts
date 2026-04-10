@@ -50,6 +50,20 @@ window.onload = function() {
     } );
   }
 
+  // When the map container becomes visible (e.g. after switching the geodata
+  // type from 'address' to 'marker(s)' via CMB2 conditional logic), Leaflet
+  // needs to recalculate its size — otherwise only the top-left tile renders.
+  if ( typeof jQuery !== 'undefined' ) {
+    jQuery( function( $ ) {
+      var $row = $( '#map-geodata' ).closest( '.cmb-row' );
+      $row.on( 'CMB2show', function() {
+        setTimeout( function() {
+          map.invalidateSize();
+        }, 0 );
+      } );
+    } );
+  }
+
   map.on( 'click', function (e) {
     var coord = e.latlng;
     var lat = coord.lat;
