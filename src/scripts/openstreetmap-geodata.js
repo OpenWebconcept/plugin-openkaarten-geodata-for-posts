@@ -1,7 +1,17 @@
 import L from "leaflet";
 
-// Create the map with the specified configuration.
-window.onload = function() {
+// Run as soon as the DOM is ready. The script is enqueued in the footer, so the
+// DOM is already parsed by the time this executes. We deliberately do NOT rely on
+// `window.onload`: in the block editor that can fire before the CMB2 meta-box area
+// has its final layout, which caused Leaflet to cache a wrong (often zero) container
+// size and only render the top-left tile until a manual window resize.
+if ( document.readyState === 'loading' ) {
+  document.addEventListener( 'DOMContentLoaded', initializeGeodataMap );
+} else {
+  initializeGeodataMap();
+}
+
+function initializeGeodataMap() {
   // Check if there is a div with the ID 'map-geodata'.
   if ( ! document.getElementById( 'map-geodata' ) ) {
     return;
@@ -46,23 +56,17 @@ window.onload = function() {
   if (setMarker) {
     // Add a marker for every location in the markers array.
     markersArray.forEach( function( location ) {
-      addMarker( map, location[1], location[0], false );
+      addMarker( map, location[1], location[0] );
     } );
   }
 
-  // When the map container becomes visible (e.g. after switching the geodata
-  // type from 'address' to 'marker(s)' via CMB2 conditional logic), Leaflet
-  // needs to recalculate its size — otherwise only the top-left tile renders.
-  if ( typeof jQuery !== 'undefined' ) {
-    jQuery( function( $ ) {
-      var $row = $( '#map-geodata' ).closest( '.cmb-row' );
-      $row.on( 'CMB2show', function() {
-        setTimeout( function() {
-          map.invalidateSize();
-        }, 0 );
-      } );
-    } );
-  }
+  // Make sure Leaflet (re)calculates its container size whenever the map becomes
+  // visible or its dimensions change. This single mechanism covers all cases that
+  // previously left the map grey until a manual window resize:
+  //   - the initial layout settling in the (Gutenberg) meta-box area;
+  //   - the CMB2 conditional row becoming visible (address -> marker(s));
+  //   - window resizes and panel collapse/expand.
+  ensureMapSize( map, document.getElementById( 'map-geodata' ) );
 
   map.on( 'click', function (e) {
     var coord = e.latlng;
@@ -73,13 +77,67 @@ window.onload = function() {
     addMarker( map, lat, lng );
     map.panTo( new L.LatLng( lat, lng ) );
   } );
-};
+}
 
-function addMarker( map, lat, lng ) {
-  // Create a custom marker icon with the location color and icon.
-  let customIconHtml = "<div style='background-color:" + location.color + ";' class='marker-pin'></div>";
-  if (location.icon) {
-    customIconHtml += "<span class='marker-icon'><img src='" + location.icon + "'  alt='marker icon' /></span>";
+/**
+ * Keep the Leaflet map sized to its container.
+ *
+ * @param {L.Map}       map     The Leaflet map instance.
+ * @param {HTMLElement} element The map container element.
+ */
+function ensureMapSize( map, element ) {
+  // Recalculate once the first render is done, on the next tick so the browser
+  // has applied layout.
+  map.whenReady( function () {
+    setTimeout( function () {
+      map.invalidateSize();
+    }, 0 );
+  } );
+
+  // A ResizeObserver fires when the container gains or changes size, which is
+  // exactly when Leaflet needs to recalculate. This handles the container going
+  // from hidden/0px to visible without relying on fragile event ordering.
+  if ( 'ResizeObserver' in window && element ) {
+    let lastWidth = 0;
+    const observer = new ResizeObserver( function () {
+      // Only act when the container is actually visible and the width changed.
+      if ( element.offsetWidth > 0 && element.offsetWidth !== lastWidth ) {
+        lastWidth = element.offsetWidth;
+        map.invalidateSize();
+      }
+    } );
+    observer.observe( element );
+  }
+
+  // Fallback for browsers without ResizeObserver: keep listening for the CMB2
+  // conditional-logic "show" event on the surrounding row.
+  if ( typeof jQuery !== 'undefined' ) {
+    jQuery( function( $ ) {
+      var $row = $( '#map-geodata' ).closest( '.cmb-row' );
+      $row.on( 'CMB2show', function() {
+        setTimeout( function() {
+          map.invalidateSize();
+        }, 0 );
+      } );
+    } );
+  }
+}
+
+/**
+ * Add a draggable marker to the map.
+ *
+ * @param {L.Map}  map   The Leaflet map instance.
+ * @param {number} lat   Latitude.
+ * @param {number} lng   Longitude.
+ * @param {string} color Optional marker pin colour. Falls back to the CSS default.
+ * @param {string} icon  Optional marker icon URL.
+ */
+function addMarker( map, lat, lng, color, icon ) {
+  // Create a custom marker icon. Only set an inline background colour when one is
+  // explicitly provided; otherwise let the .marker-pin CSS default apply.
+  let customIconHtml = "<div" + ( color ? " style='background-color:" + color + ";'" : "" ) + " class='marker-pin'></div>";
+  if ( icon ) {
+    customIconHtml += "<span class='marker-icon'><img src='" + icon + "'  alt='marker icon' /></span>";
   }
 
   var customIcon = L.divIcon( {
