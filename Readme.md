@@ -95,3 +95,11 @@ npm run watch
 ## REST API Endpoints
 This plugin adds the following REST API GET-endpoints:
 - `/wp-json/owc/openkaarten/v1/openpub-items`
+
+## Changelog
+
+### 0.1.14
+* Fixed: the editor map (`map-geodata`) stayed grey / only loaded the top-left tile until the browser window was resized. The map now recalculates its size via a `ResizeObserver` (and `map.whenReady`), so it renders correctly on initial load, when the conditional CMB2 row becomes visible, and on resize — in both the Classic and Gutenberg editor.
+* Fixed: `addMarker()` referenced an undefined `location` variable (the global `window.location`) for the marker colour/icon; colour and icon are now optional parameters with a sensible CSS default.
+* Improved: the overview map (`map-base`) uses the same size-recalculation logic.
+* Improved: the `owc_ok-openstreetmap-geodata` script now declares its `jquery` dependency.
