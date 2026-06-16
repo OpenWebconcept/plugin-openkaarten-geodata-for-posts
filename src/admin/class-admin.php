@@ -165,7 +165,7 @@ class Admin {
 		wp_enqueue_script(
 			'owc_ok-openstreetmap-geodata',
 			self::mix( '/scripts/openstreetmap-geodata.js' ),
-			[],
+			[ 'jquery' ],
 			OWC_OPENKAARTEN_GEODATA_VERSION,
 			true
 		);
